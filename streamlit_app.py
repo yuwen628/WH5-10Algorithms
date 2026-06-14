@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 from app import ALGORITHMS, BASE_DIR, PDF_FILES
 
@@ -98,6 +97,19 @@ STYLE = """
   }
   code, pre {
     white-space: pre-wrap !important;
+  }
+  .demo-svg-wrap {
+    width: 100%;
+    min-height: 390px;
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    background: #f8fbfb;
+    padding: 12px;
+  }
+  .demo-svg-wrap svg {
+    width: 100%;
+    height: 360px;
+    display: block;
   }
 </style>
 """
@@ -283,7 +295,7 @@ print("validation_score", {metrics['metric']})"""
 st.markdown(STYLE, unsafe_allow_html=True)
 
 hero_path = BASE_DIR / "static" / "hero-ai.png"
-st.image(hero_path, use_container_width=True)
+st.image(hero_path, width="stretch")
 st.title("十大機器學習演算法研讀報告")
 st.caption("Streamlit Cloud 版本：互動式演算法摘要、案例、Python 參數模擬與檢核題。")
 
@@ -307,7 +319,7 @@ selected = next(item for item in ALGORITHMS if item["name"] == selected_name)
 
 top_cols = st.columns([1, 1.2], vertical_alignment="center")
 with top_cols[0]:
-    st.image(BASE_DIR / "static" / selected["image"], use_container_width=True)
+    st.image(BASE_DIR / "static" / selected["image"], width="stretch")
 with top_cols[1]:
     st.subheader(selected["name"])
     st.caption(selected["tag"])
@@ -356,11 +368,7 @@ with python_tab:
             st.caption(f"{variable['low']} / {variable['high']}")
 
     metrics = calculate_metrics(values, demo)
-    components.html(
-        build_demo_svg(selected["slug"], values, demo, metrics),
-        height=390,
-        scrolling=False,
-    )
+    st.html(f'<div class="demo-svg-wrap">{build_demo_svg(selected["slug"], values, demo, metrics)}</div>')
     m1, m2, m3 = st.columns(3)
     m1.metric("模擬表現", f"{metrics['performance']}%")
     m2.metric("複雜度", f"{metrics['complexity']}%")
