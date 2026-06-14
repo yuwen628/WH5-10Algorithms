@@ -1,52 +1,199 @@
 from __future__ import annotations
 
 import base64
+import html
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from app import ALGORITHMS, BASE_DIR, PDF_FILES
 
 
 st.set_page_config(
-    page_title="十大機器學習演算法研讀報告",
+    page_title="十大機器學習演算法學習網站",
+    page_icon="ML",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 
-STYLE = """
+STATIC_DIR = BASE_DIR / "static"
+HERO_IMAGE = STATIC_DIR / "hero-ai.png"
+PAGES = ["總覽", "比較矩陣", "練習測驗", "研讀報告 PDF"]
+
+
+MODEL_FAMILIES = {
+    "linear-regression": "監督式學習 / 回歸",
+    "logistic-regression": "監督式學習 / 分類",
+    "decision-tree": "監督式學習 / 分類與回歸",
+    "random-forest": "集成學習 / Bagging",
+    "svm": "監督式學習 / 最大間隔",
+    "knn": "監督式學習 / 距離模型",
+    "k-means": "非監督式學習 / 分群",
+    "pca": "非監督式學習 / 降維",
+    "naive-bayes": "監督式學習 / 機率模型",
+    "gradient-boosting": "集成學習 / Boosting",
+}
+
+MODEL_PROFILE = {
+    "linear-regression": {
+        "difficulty": "入門",
+        "data": "連續數值目標、關係近似線性",
+        "strength": "速度快、係數容易解釋、適合基準線",
+        "watch": "離群值、非線性關係、共線性",
+    },
+    "logistic-regression": {
+        "difficulty": "入門",
+        "data": "二元或多類別標籤、需要機率分數",
+        "strength": "輸出可解釋機率、門檻容易調整",
+        "watch": "特徵尺度、類別不平衡、線性邊界限制",
+    },
+    "decision-tree": {
+        "difficulty": "入門",
+        "data": "表格資料、需要明確規則",
+        "strength": "流程像 if-then，易向業務說明",
+        "watch": "樹太深容易過度擬合",
+    },
+    "random-forest": {
+        "difficulty": "中階",
+        "data": "多欄位表格資料、希望結果穩定",
+        "strength": "降低單棵樹變異，可看特徵重要性",
+        "watch": "單一預測路徑較難解釋、模型較大",
+    },
+    "svm": {
+        "difficulty": "中階",
+        "data": "中小型資料、高維特徵",
+        "strength": "最大化分類間隔，kernel 能處理非線性",
+        "watch": "大資料訓練成本、參數 C 與 gamma",
+    },
+    "knn": {
+        "difficulty": "入門",
+        "data": "相似度有意義、特徵尺度已整理",
+        "strength": "概念直覺，能做相似案例查找",
+        "watch": "預測時成本高、對尺度與雜訊敏感",
+    },
+    "k-means": {
+        "difficulty": "入門",
+        "data": "沒有標籤、想探索群組",
+        "strength": "速度快，適合客群與行為分群",
+        "watch": "K 值選擇、非球狀或密度差異群",
+    },
+    "pca": {
+        "difficulty": "中階",
+        "data": "高維數值特徵、想壓縮或視覺化",
+        "strength": "保留主要變異，降低維度與雜訊",
+        "watch": "主成分不一定有直觀業務語意",
+    },
+    "naive-bayes": {
+        "difficulty": "入門",
+        "data": "文字、計數、稀疏特徵",
+        "strength": "訓練極快，常是文字分類強基準",
+        "watch": "條件獨立假設過於簡化",
+    },
+    "gradient-boosting": {
+        "difficulty": "進階",
+        "data": "結構化資料、追求高預測力",
+        "strength": "逐步修正錯誤，能捕捉非線性互動",
+        "watch": "調參較多、過擬合與訓練成本",
+    },
+}
+
+
+def image_data_uri(path: Path) -> str:
+    suffix = path.suffix.lower().lstrip(".")
+    mime = "image/svg+xml" if suffix == "svg" else f"image/{suffix}"
+    encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
+    return f"data:{mime};base64,{encoded}"
+
+
+@st.cache_data(show_spinner=False)
+def cached_image_data_uri(path_text: str) -> str:
+    return image_data_uri(Path(path_text))
+
+
+@st.cache_data(show_spinner=False)
+def cached_pdf_data_uri(path_text: str) -> str:
+    path = Path(path_text)
+    encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
+    return f"data:application/pdf;base64,{encoded}"
+
+
+def css() -> None:
+    st.markdown(
+        """
 <style>
   :root {
-    --app-bg: #f7f8f5;
+    --bg: #f6f7f9;
     --panel: #ffffff;
-    --panel-soft: #f8fbfb;
-    --sidebar-bg: #f7f8f5;
-    --ink: #1f2933;
-    --muted: #5f6b7a;
-    --line: #d7dee8;
-    --accent: #0f766e;
-    --accent-2: #b45309;
-    --accent-soft: #e9f7f4;
-    --tip-bg: #fff7ed;
-    --shadow: rgba(31, 41, 51, .08);
+    --panel-soft: #eef6f4;
+    --ink: #18202a;
+    --muted: #647181;
+    --line: #dbe2ea;
+    --accent: #087f8c;
+    --accent-deep: #075b63;
+    --warm: #b86216;
+    --warm-soft: #fff4e6;
   }
   .stApp {
-    background: var(--app-bg);
+    background: var(--bg);
     color: var(--ink);
   }
   .main .block-container {
     max-width: 1220px;
-    padding-top: 1.5rem;
+    padding-top: 1.3rem;
     padding-bottom: 3rem;
+  }
+  section[data-testid="stSidebar"] {
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+    background: #ffffff;
+    border-right: 1px solid var(--line);
+  }
+  section[data-testid="stSidebar"] > div {
+    width: 250px !important;
+  }
+  section[data-testid="stSidebar"] div[data-testid="stButton"] {
+    margin-top: 8px;
+  }
+  section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    min-height: 46px;
+    justify-content: flex-start;
+    padding: .62rem .75rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+    color: var(--ink);
+    font-weight: 700;
+    box-shadow: 0 1px 0 rgba(24, 32, 42, .03);
+    transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+  section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+    transform: translateX(4px);
+    border-color: #86c8c5;
+    background: #eef9f7;
+    color: var(--accent-deep);
+    box-shadow: 0 8px 22px rgba(8, 127, 140, .11);
+  }
+  section[data-testid="stSidebar"] div[data-testid="stButton"] > button[kind="primary"] {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, #e9f8f5, #fff7eb);
+    color: var(--accent-deep);
+    box-shadow: inset 4px 0 0 var(--accent), 0 8px 22px rgba(8, 127, 140, .12);
+    font-weight: 800;
+  }
+  h1, h2, h3 {
+    letter-spacing: 0;
   }
   .hero {
     position: relative;
-    min-height: 360px;
-    overflow: hidden;
+    min-height: 390px;
     border-radius: 8px;
-    background: #162b3f;
-    margin-bottom: 1.5rem;
+    overflow: hidden;
+    background: #111827;
+    margin-bottom: 1.2rem;
   }
   .hero img {
     position: absolute;
@@ -55,524 +202,586 @@ STYLE = """
     height: 100%;
     object-fit: cover;
   }
-  .hero::after {
+  .hero:after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(10, 23, 36, .86), rgba(10, 23, 36, .42) 58%, rgba(10, 23, 36, .16));
+    background: linear-gradient(90deg, rgba(8, 17, 28, .92), rgba(8, 17, 28, .62) 50%, rgba(8, 17, 28, .18));
   }
   .hero-content {
     position: relative;
     z-index: 1;
-    width: min(760px, 100%);
-    padding: 78px 54px;
-    color: #fff;
+    width: min(740px, 100%);
+    padding: 70px 52px 86px;
+    color: white;
   }
-  .hero-content p {
-    margin: 0 0 10px;
-    color: #f5c36b;
+  .eyebrow {
+    margin: 0 0 .65rem;
+    color: #f1b35b;
+    font-size: .84rem;
     font-weight: 800;
     text-transform: uppercase;
   }
-  .hero-content h1 {
-    margin: 0 0 14px;
-    font-size: clamp(2.2rem, 7vw, 4.8rem);
-    line-height: 1.04;
+  .hero h1 {
+    margin: 0 0 .9rem;
+    font-size: clamp(2.25rem, 6vw, 4.7rem);
+    line-height: 1.02;
   }
-  .hero-content span {
-    display: block;
-    max-width: 640px;
-    color: #edf4f7;
-    font-size: 1.08rem;
+  .hero p.copy {
+    color: rgba(255,255,255,.86);
+    font-size: 1.06rem;
+    line-height: 1.75;
+    margin: 0;
+    max-width: 670px;
   }
-  .metric-card, .step-card, .qa-card, .info-card {
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .8rem;
+    margin: .75rem 0 1.25rem;
+  }
+  .metric {
+    background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 8px;
+    padding: .95rem 1rem;
+  }
+  .metric strong {
+    display: block;
+    font-size: 1.55rem;
+    color: var(--accent-deep);
+    line-height: 1.2;
+  }
+  .metric span {
+    color: var(--muted);
+    font-size: .88rem;
+  }
+  .algo-card {
+    min-height: 268px;
+    background: transparent;
+  }
+  .main div[data-testid="stButton"] {
+    margin-top: 10px;
+  }
+  .main div[data-testid="stButton"] > button {
+    border-radius: 8px;
+    border-color: #087f8c;
+    background: #087f8c;
+    color: #ffffff;
+    font-weight: 800;
+    transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+  .main div[data-testid="stButton"] > button:hover {
+    transform: translateY(-1px);
+    border-color: #075b63;
+    background: #075b63;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(8, 127, 140, .12);
+  }
+  .main div[data-testid="stButton"] > button:focus,
+  .main div[data-testid="stButton"] > button:active {
+    color: #ffffff;
+  }
+  .algo-card img {
+    width: 100%;
+    height: 92px;
+    object-fit: contain;
+    margin-bottom: .75rem;
+    background: #f9fbfc;
+    border-radius: 6px;
+  }
+  .algo-card h3 {
+    margin: .1rem 0 .25rem;
+    font-size: 1.12rem;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #b7deda;
+    color: #075b63;
+    background: #eef9f7;
+    border-radius: 999px;
+    padding: .16rem .55rem;
+    font-size: .76rem;
+    font-weight: 700;
+    margin-bottom: .55rem;
+  }
+  .muted {
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .section-note {
+    color: var(--muted);
+    margin-top: -.35rem;
+    margin-bottom: 1rem;
+  }
+  .info-panel {
     background: var(--panel);
-    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.05rem;
     height: 100%;
-    box-shadow: 0 14px 30px var(--shadow);
   }
-  .step-card strong, .qa-card strong {
-    color: var(--ink);
+  .info-panel h4 {
+    margin: 0 0 .45rem;
+    font-size: .95rem;
+    color: #1f2937;
   }
-  .step-number {
-    display: inline-grid;
+  .flow-step {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: .7rem;
+    align-items: start;
+    padding: .72rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .flow-step:last-child {
+    border-bottom: 0;
+  }
+  .step-no {
+    width: 34px;
+    height: 34px;
+    display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
     border-radius: 50%;
     background: var(--accent);
     color: #fff;
-    font-weight: 850;
-    margin-bottom: 10px;
+    font-weight: 800;
   }
-  .tip {
-    border-left: 5px solid var(--accent-2);
-    border-radius: 8px;
-    background: var(--tip-bg);
-    color: var(--ink);
-    padding: 16px;
-    font-weight: 700;
+  .bar {
+    height: 12px;
+    background: #e5ebf1;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: .28rem 0 .72rem;
   }
-  code, pre {
-    white-space: pre-wrap !important;
-  }
-  .demo-svg-wrap {
-    width: 100%;
-    min-height: 390px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--panel-soft);
-    padding: 12px;
-    box-shadow: 0 16px 34px var(--shadow);
-  }
-  .demo-svg-wrap svg {
-    width: 100%;
-    height: 360px;
+  .bar span {
     display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #d68a2f);
+    border-radius: 999px;
   }
-  .demo-svg-wrap img {
-    width: 100%;
-    height: 360px;
-    display: block;
-    object-fit: contain;
+  .callout {
+    background: var(--warm-soft);
+    border: 1px solid #f1cfaa;
+    border-radius: 8px;
+    padding: .9rem 1rem;
+    color: #4a2d12;
+    line-height: 1.65;
   }
-  [data-testid="stSidebar"] {
-    background: var(--sidebar-bg);
-    border-right: 1px solid var(--line);
-  }
-  [data-testid="stSidebar"] [role="radiogroup"] {
-    display: grid;
-    gap: 8px;
-  }
-  [data-testid="stSidebar"] [role="radiogroup"] label {
-    min-height: 46px;
-    padding: 10px 12px;
+  .pdf-frame {
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: var(--panel);
-    box-shadow: 0 10px 24px var(--shadow);
+    overflow: hidden;
+    background: white;
   }
-  [data-testid="stSidebar"] [role="radiogroup"] label:hover {
-    border-color: rgba(15, 118, 110, .55);
-  }
-  [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    box-shadow: inset 4px 0 0 var(--accent), 0 12px 28px rgba(15, 118, 110, .12);
-  }
-  [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p {
-    color: var(--ink);
-    font-weight: 850;
-  }
-  [data-testid="stSidebar"] h1,
-  [data-testid="stSidebar"] h2,
-  [data-testid="stSidebar"] h3,
-  [data-testid="stSidebar"] p,
-  [data-testid="stMarkdownContainer"] {
-    color: var(--ink);
-  }
-  [data-testid="stMetric"] {
-    padding: 14px 16px;
+  div[data-testid="stDataFrame"] {
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: var(--panel);
-    box-shadow: 0 12px 28px var(--shadow);
   }
-  .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
+  @media (max-width: 820px) {
+    .hero {
+      min-height: 430px;
+    }
+    .hero-content {
+      padding: 54px 24px 74px;
+    }
+    .metric-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
-  .stTabs [data-baseweb="tab"] {
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--panel);
-    color: var(--ink);
-  }
-  .stTabs [aria-selected="true"] {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--ink);
+  @media (max-width: 560px) {
+    .metric-row {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def selected_algorithm(slug: str) -> dict[str, Any]:
+    return next(item for item in ALGORITHMS if item["slug"] == slug)
+
+
+def init_state() -> None:
+    st.session_state.setdefault("active_page", "總覽")
+    st.session_state.setdefault("selected_slug", ALGORITHMS[0]["slug"])
+
+
+def set_page(page: str) -> None:
+    st.session_state["active_page"] = page
+
+
+def open_algorithm(slug: str) -> None:
+    st.session_state["selected_slug"] = slug
+    st.session_state["active_page"] = "深入學習"
+
+
+def card_html(algo: dict[str, Any]) -> str:
+    image_path = STATIC_DIR / algo["image"]
+    image_src = cached_image_data_uri(str(image_path)) if image_path.exists() else ""
+    return f"""
+<div class="algo-card">
+  {'<img src="' + image_src + '" alt="">' if image_src else ''}
+  <span class="tag">{html.escape(MODEL_FAMILIES[algo["slug"]])}</span>
+  <h3>{html.escape(algo["name"])}</h3>
+  <div class="muted"><strong>{html.escape(algo["tag"])}</strong></div>
+  <p class="muted">{html.escape(algo["summary"])}</p>
+</div>
 """
 
 
-def theme_css(dark_mode: bool) -> str:
-    if dark_mode:
-        values = {
-            "app-bg": "#101820",
-            "panel": "#17212b",
-            "panel-soft": "#1f2b36",
-            "sidebar-bg": "#121c24",
-            "ink": "#edf4f7",
-            "muted": "#b9c6d0",
-            "line": "#304252",
-            "accent": "#36c4b4",
-            "accent-2": "#f5c36b",
-            "accent-soft": "#173f3c",
-            "tip-bg": "#2a2418",
-            "shadow": "rgba(0, 0, 0, .28)",
-        }
-    else:
-        values = {
-            "app-bg": "#f7f8f5",
-            "panel": "#ffffff",
-            "panel-soft": "#f8fbfb",
-            "sidebar-bg": "#f7f8f5",
-            "ink": "#1f2933",
-            "muted": "#5f6b7a",
-            "line": "#d7dee8",
-            "accent": "#0f766e",
-            "accent-2": "#b45309",
-            "accent-soft": "#e9f7f4",
-            "tip-bg": "#fff7ed",
-            "shadow": "rgba(31, 41, 51, .08)",
-        }
-
-    variables = "\n".join(f"    --{key}: {value};" for key, value in values.items())
-    return f"""
-    <style>
-      :root {{
-{variables}
-      }}
-      html,
-      body,
-      .stApp,
-      [data-testid="stAppViewContainer"],
-      [data-testid="stMain"],
-      [data-testid="stMainBlockContainer"],
-      section.main {{
-        background: {values["app-bg"]} !important;
-        color: {values["ink"]} !important;
-      }}
-      [data-testid="stHeader"] {{
-        background: {values["app-bg"]} !important;
-        color: {values["ink"]} !important;
-      }}
-      [data-testid="stSidebar"],
-      [data-testid="stSidebarContent"] {{
-        background: {values["sidebar-bg"]} !important;
-        color: {values["ink"]} !important;
-      }}
-      [data-testid="stMarkdownContainer"],
-      [data-testid="stMarkdownContainer"] p,
-      [data-testid="stMarkdownContainer"] li,
-      [data-testid="stMarkdownContainer"] h1,
-      [data-testid="stMarkdownContainer"] h2,
-      [data-testid="stMarkdownContainer"] h3,
-      [data-testid="stMarkdownContainer"] h4,
-      [data-testid="stMarkdownContainer"] h5,
-      [data-testid="stMarkdownContainer"] h6,
-      [data-testid="stWidgetLabel"],
-      [data-testid="stCaptionContainer"] {{
-        color: {values["ink"]} !important;
-      }}
-      .stAlert,
-      [data-testid="stNotificationContentInfo"],
-      [data-testid="stExpander"] {{
-        background: {values["panel"]} !important;
-        color: {values["ink"]} !important;
-        border-color: {values["line"]} !important;
-      }}
-    </style>
-    """
+def metric_grid() -> None:
+    st.markdown(
+        """
+<div class="metric-row">
+  <div class="metric"><strong>10</strong><span>核心演算法</span></div>
+  <div class="metric"><strong>6</strong><span>學習分類脈絡</span></div>
+  <div class="metric"><strong>30</strong><span>檢核題與解答</span></div>
+  <div class="metric"><strong>1</strong><span>完整研讀報告 PDF</span></div>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
-def file_data_uri(path: Path, mime: str) -> str:
-    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-    return f"data:{mime};base64,{encoded}"
+def hero() -> None:
+    image_src = cached_image_data_uri(str(HERO_IMAGE)) if HERO_IMAGE.exists() else ""
+    st.markdown(
+        f"""
+<section class="hero">
+  {'<img src="' + image_src + '" alt="Machine learning visual">' if image_src else ''}
+  <div class="hero-content">
+    <p class="eyebrow">Machine Learning Study Guide</p>
+    <h1>十大機器學習演算法</h1>
+    <p class="copy">依照研讀報告整理成可瀏覽、可比較、可練習的 Streamlit 學習網站。從模型直覺、適用場景、Python 範例到檢核題，幫你把演算法放進可以使用的知識架構。</p>
+  </div>
+</section>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
-def file_size_mb(path: Path) -> float:
-    return round(path.stat().st_size / 1024 / 1024, 1)
+def overview_page() -> None:
+    hero()
+    metric_grid()
 
+    st.subheader("學習地圖")
+    st.markdown(
+        '<p class="section-note">先用模型類型建立大方向，再進到單一演算法看原理、案例與參數。</p>',
+        unsafe_allow_html=True,
+    )
 
-def pct_bar(label: str, value: int) -> None:
-    st.markdown(f"**{label}**")
-    st.progress(max(0, min(100, value)), text=f"{value}")
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for algo in ALGORITHMS:
+        groups.setdefault(MODEL_FAMILIES[algo["slug"]].split(" / ")[0], []).append(algo)
 
-
-def normalize(value: float, minimum: float, maximum: float) -> float:
-    if maximum == minimum:
-        return 0.0
-    return (value - minimum) / (maximum - minimum)
-
-
-def calculate_metrics(values: dict[str, float], demo: dict) -> dict[str, int | str]:
-    primary = demo["variables"][0]
-    primary_norm = normalize(values[primary["key"]], primary["min"], primary["max"])
-    sample_norm = normalize(values["sample_count"], demo["variables"][1]["min"], demo["variables"][1]["max"])
-    noise_norm = normalize(values["noise_level"], demo["variables"][2]["min"], demo["variables"][2]["max"])
-    sweet_spot = 0.34 if demo["slug"] == "gradient-boosting" else 0.62
-    distance = min(1.0, abs(primary_norm - sweet_spot) / max(sweet_spot, 1 - sweet_spot))
-
-    performance = round(max(38, min(96, 60 + (1 - distance) * 24 + sample_norm * 10 - noise_norm * 16)))
-    complexity = round(max(15, min(98, 20 + primary_norm * 58 + sample_norm * 12)))
-    stability = round(max(35, min(96, 92 - distance * 18 + sample_norm * 8 - noise_norm * 28)))
-    return {
-        "performance": performance,
-        "complexity": complexity,
-        "stability": stability,
-        "metric": f"{performance / 100:.2f}",
-    }
-
-
-def make_points(sample_count: int, noise_level: int, groups: int = 2) -> list[tuple[float, float, int]]:
-    centers = [(150, 90), (370, 175), (250, 180), (410, 80)]
-    points = []
-    for index in range(round(sample_count / 12)):
-        group = index % groups
-        cx, cy = centers[group % len(centers)]
-        drift = noise_level * 1.6
-        x = max(42, min(478, cx + __import__("math").sin(index * 2.19) * (28 + drift) + __import__("math").cos(index) * 11))
-        y = max(38, min(222, cy + __import__("math").cos(index * 1.71) * (24 + drift) + __import__("math").sin(index * 1.3) * 10))
-        points.append((x, y, group))
-    return points
-
-
-def svg_circle(x: float, y: float, r: int, fill: str) -> str:
-    return f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{fill}"/>'
-
-
-def svg_line(x1: float, y1: float, x2: float, y2: float, color: str, width: int = 5, extra: str = "") -> str:
-    return f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{color}" stroke-width="{width}" stroke-linecap="round" {extra}/>'
-
-
-def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dict[str, int | str], dark_mode: bool = False) -> str:
-    colors = ["#36c4b4", "#f5c36b", "#8f7df2", "#f87171"] if dark_mode else ["#0f766e", "#b45309", "#6d5bd0", "#dc2626"]
-    canvas_bg = "#1f2b36" if dark_mode else "#f8fbfb"
-    axis = "#edf4f7" if dark_mode else "#17324d"
-    primary_key = demo["variables"][0]["key"]
-    primary = values[primary_key]
-    noise = values["noise_level"]
-    samples = values["sample_count"]
-    groups = max(2, int(primary)) if slug == "k-means" else 2
-    points = "".join(svg_circle(x, y, 5, colors[group % len(colors)]) for x, y, group in make_points(int(samples), int(noise), groups))
-
-    if slug == "linear-regression":
-        slope = 0.36 + primary * 0.055
-        y1 = 212 - noise * 0.5
-        y2 = y1 - 320 * slope
-        body = f'{svg_line(42, 226, 486, 226, axis, 3)}{svg_line(54, 226, 54, 34, axis, 3)}{points}{svg_line(74, y1, 454, y2, colors[0], 7)}'
-    elif slug == "logistic-regression":
-        curve = 80 + primary * 7
-        body = f'{svg_line(42, 226, 486, 226, axis, 3)}{svg_line(54, 226, 54, 34, axis, 3)}{points}<path d="M70 210 C 160 210, 190 {curve + 70:.1f}, 262 {curve:.1f} S 370 54, 458 54" fill="none" stroke="{colors[0]}" stroke-width="7" stroke-linecap="round"/><line x1="58" y1="132" x2="470" y2="132" stroke="{colors[1]}" stroke-width="3" stroke-dasharray="8 9"/>'
-    elif slug == "decision-tree":
-        levels = min(5, int(primary))
-        body = f'<circle cx="260" cy="42" r="24" fill="{colors[0]}"/>'
-        for level in range(1, levels + 1):
-            nodes = min(2 ** level, 12)
-            for node in range(nodes):
-                x = 60 + node * (400 / max(1, nodes - 1))
-                y = 42 + level * 36
-                body += svg_line(260, 42 + (level - 1) * 24, x, y, axis, 2)
-                body += svg_circle(x, y, 10, colors[node % len(colors)])
-    elif slug == "random-forest":
-        body = ""
-        for index in range(max(1, round(primary / 30))):
-            x = 54 + index * 38
-            body += svg_line(x, 126, x, 74, axis, 3)
-            body += svg_line(x, 100, x - 18, 132, axis, 3)
-            body += svg_line(x, 100, x + 18, 132, axis, 3)
-            body += svg_circle(x, 68, 10, colors[index % len(colors)])
-        body += f'<rect x="190" y="186" width="140" height="42" rx="21" fill="{axis}"/><text x="260" y="213" fill="{canvas_bg}" text-anchor="middle" font-size="18" font-weight="800">vote {metrics["stability"]}%</text>'
-    elif slug == "svm":
-        margin = max(28, min(116, 88 - primary * 4.5 + noise * 0.6))
-        dashed = 'stroke-dasharray="8 8"'
-        body = f'{points}{svg_line(130, 226, 390, 42, axis, 7)}{svg_line(130 - margin, 226, 390 - margin, 42, colors[1], 3, dashed)}{svg_line(130 + margin, 226, 390 + margin, 42, colors[1], 3, dashed)}'
-    elif slug == "knn":
-        radius = 40 + primary * 6
-        body = f'{points}{svg_circle(260, 130, 10, axis)}<circle cx="260" cy="130" r="{radius:.1f}" fill="none" stroke="{colors[0]}" stroke-width="5" stroke-dasharray="10 8"/><text x="260" y="236" fill="{axis}" text-anchor="middle" font-size="18" font-weight="800">K={primary:g}</text>'
-    elif slug == "k-means":
-        centers = [(150, 90), (370, 175), (250, 180), (410, 80), (116, 180), (320, 84), (220, 70), (430, 215)]
-        body = points
-        for index, (x, y) in enumerate(centers[: int(primary)]):
-            body += f'<path d="M{x} {y - 13}l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z" fill="{colors[index % len(colors)]}"/>'
-    elif slug == "pca":
-        angle = 24 + primary * 4
-        dashed = 'stroke-dasharray="8 8"'
-        body = f'{points}<g transform="rotate(-{angle:.1f} 260 130)">{svg_line(70, 130, 454, 130, colors[0], 7)}{svg_line(170, 82, 350, 178, colors[1], 4, dashed)}</g><text x="62" y="42" fill="{axis}" font-size="18" font-weight="800">components={primary:g}</text>'
-    elif slug == "naive-bayes":
-        body = ""
-        for index, height in enumerate([metrics["performance"], metrics["stability"], 100 - noise * 1.5]):
-            body += f'<rect x="{104 + index * 100}" y="{220 - float(height) * 1.5:.1f}" width="54" height="{float(height) * 1.5:.1f}" rx="8" fill="{colors[index]}"/>'
-        body += f'<text x="260" y="42" fill="{axis}" text-anchor="middle" font-size="18" font-weight="800">alpha={primary:g}</text><path d="M96 226H430" stroke="{axis}" stroke-width="4" stroke-linecap="round"/>'
-    else:
-        steps = round(4 + primary * 20)
-        body = ""
-        for index in range(min(8, steps)):
-            x = 64 + index * 52
-            height = 42 + index * 15 - noise * 0.4
-            body += f'<rect x="{x}" y="{190 - height:.1f}" width="34" height="{height:.1f}" rx="8" fill="{colors[index % len(colors)]}"/>'
-            if index < 7:
-                body += f'<text x="{x + 42}" y="150" fill="#b45309" font-size="24" font-weight="800">+</text>'
-        body += f'<path d="M58 222C150 206 220 182 292 146C352 116 404 88 458 44" fill="none" stroke="{axis}" stroke-width="6" stroke-linecap="round"/>'
-
-    return f"""
-    <svg viewBox="0 0 520 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-      <rect width="520" height="260" rx="18" fill="{canvas_bg}"/>
-      {body}
-    </svg>
-    """
-
-
-def svg_data_uri(svg: str) -> str:
-    encoded = base64.b64encode(svg.encode("utf-8")).decode("ascii")
-    return f"data:image/svg+xml;base64,{encoded}"
-
-
-def code_sample(slug: str, values: dict[str, float], metrics: dict[str, int | str], demo: dict) -> str:
-    primary_key = demo["variables"][0]["key"]
-    primary_value = values[primary_key]
-    if slug == "linear-regression":
-        return f"""from sklearn.linear_model import LinearRegression
-
-X, y = make_regression_dataset(
-    n_samples={values['sample_count']},
-    n_features={primary_value},
-    noise={values['noise_level']}
-)
-model = LinearRegression()
-model.fit(X, y)
-print("validation_score", {metrics['metric']})"""
-    if slug == "k-means":
-        return f"""from sklearn.cluster import KMeans
-
-X = make_customer_vectors(
-    n_samples={values['sample_count']},
-    noise={values['noise_level']}
-)
-model = KMeans(n_clusters={primary_value}, n_init="auto", random_state=42)
-labels = model.fit_predict(X)
-print("cluster_score", {metrics['metric']})"""
-    estimator_map = {
-        "logistic-regression": ("from sklearn.linear_model import LogisticRegression", f"LogisticRegression(C={primary_value}, max_iter=1000)"),
-        "decision-tree": ("from sklearn.tree import DecisionTreeClassifier", f"DecisionTreeClassifier(max_depth={primary_value}, random_state=42)"),
-        "random-forest": ("from sklearn.ensemble import RandomForestClassifier", f"RandomForestClassifier(n_estimators={primary_value}, random_state=42)"),
-        "svm": ("from sklearn.svm import SVC", f'SVC(kernel="rbf", C={primary_value}, gamma="scale")'),
-        "knn": ("from sklearn.neighbors import KNeighborsClassifier", f"KNeighborsClassifier(n_neighbors={primary_value})"),
-        "pca": ("from sklearn.decomposition import PCA", f"PCA(n_components={primary_value})"),
-        "naive-bayes": ("from sklearn.naive_bayes import MultinomialNB", f"MultinomialNB(alpha={primary_value})"),
-        "gradient-boosting": ("from sklearn.ensemble import GradientBoostingClassifier", f"GradientBoostingClassifier(learning_rate={primary_value}, random_state=42)"),
-    }
-    import_line, estimator = estimator_map[slug]
-    return f"""{import_line}
-
-X, y = make_dataset(
-    n_samples={values['sample_count']},
-    noise={values['noise_level']}
-)
-model = {estimator}
-model.fit(X, y)
-print("validation_score", {metrics['metric']})"""
-
-
-with st.sidebar:
-    dark_mode = st.toggle("深色背景", value=False)
-
-st.markdown(STYLE + theme_css(dark_mode), unsafe_allow_html=True)
-
-hero_path = BASE_DIR / "static" / "hero-ai.png"
-st.markdown(
-    f"""
-    <section class="hero">
-      <img src="{file_data_uri(hero_path, "image/png")}" alt="十大機器學習演算法主視覺">
-      <div class="hero-content">
-        <p>Machine Learning Study Notes</p>
-        <h1>十大機器學習演算法研讀報告</h1>
-        <span>互動式演算法摘要、實務案例、Python 參數模擬與學習檢核題。</span>
-      </div>
-    </section>
-    """,
-    unsafe_allow_html=True,
-)
-
-with st.sidebar:
-    st.header("演算法分頁")
-    st.caption("選擇一個演算法，右側內容會切換成對應頁面。")
-    selected_name = st.radio("演算法", [item["name"] for item in ALGORITHMS], label_visibility="collapsed")
-    st.divider()
-    st.subheader("原始 PDF")
-    for key, filename in PDF_FILES.items():
-        path = BASE_DIR / filename
-        if path.exists():
-            st.download_button(
-                label=f"{filename} ({file_size_mb(path)} MB)",
-                data=path.read_bytes(),
-                file_name=filename,
-                mime="application/pdf",
-                key=f"pdf-{key}",
-            )
-
-selected = next(item for item in ALGORITHMS if item["name"] == selected_name)
-
-top_cols = st.columns([1, 1.2], vertical_alignment="center")
-with top_cols[0]:
-    st.image(BASE_DIR / "static" / selected["image"], use_container_width=True)
-with top_cols[1]:
-    st.subheader(selected["name"])
-    st.caption(selected["tag"])
-    st.write(selected["summary"])
-    st.info(f"常見用途：{selected['uses']}")
-
-principle_tab, case_tab, python_tab, check_tab = st.tabs(["原理", "實務案例", "Python 實作", "檢核題"])
-
-with principle_tab:
-    st.write(selected["principle"])
-    step_cols = st.columns(3)
-    for index, (title, description) in enumerate(selected["principle_guide"]["steps"]):
-        with step_cols[index]:
+    cols = st.columns(3)
+    for index, (family, items) in enumerate(groups.items()):
+        with cols[index % 3]:
+            names = "、".join(item["name"] for item in items)
             st.markdown(
-                f'<div class="step-card"><span class="step-number">{index + 1:02d}</span><br><strong>{title}</strong><p>{description}</p></div>',
+                f"""
+<div class="info-panel">
+  <h4>{html.escape(family)}</h4>
+  <p class="muted">{html.escape(names)}</p>
+</div>
+                """,
                 unsafe_allow_html=True,
             )
-    st.write("")
-    chart_cols = st.columns(3)
-    for index, (label, value) in enumerate(selected["principle_guide"]["chart"]):
-        with chart_cols[index]:
-            pct_bar(label, value)
-    st.markdown(f'<div class="tip">{selected["principle_guide"]["tip"]}</div>', unsafe_allow_html=True)
 
-with case_tab:
-    st.write(selected["case"])
-    st.write(selected["case_detail"])
-    for label, value in selected["case_metrics"]:
-        pct_bar(label, value)
+    st.subheader("十個演算法速覽")
+    for row_start in range(0, len(ALGORITHMS), 4):
+        cols = st.columns(4, gap="medium")
+        for col, algo in zip(cols, ALGORITHMS[row_start : row_start + 4]):
+            with col:
+                with st.container(border=True):
+                    st.markdown(card_html(algo), unsafe_allow_html=True)
+                    st.button(
+                        "深入學習",
+                        key=f"open-{algo['slug']}",
+                        on_click=open_algorithm,
+                        args=(algo["slug"],),
+                        use_container_width=True,
+                    )
 
-with python_tab:
-    demo = selected["demo"]
-    values = {}
-    control_cols = st.columns(3)
-    for index, variable in enumerate(demo["variables"]):
-        with control_cols[index]:
-            values[variable["key"]] = st.slider(
+
+def score_from_demo(algo: dict[str, Any], value: float, samples: int, noise: int) -> int:
+    demo = algo["demo"]
+    min_v = float(demo["min"])
+    max_v = float(demo["max"])
+    span = max(max_v - min_v, 0.001)
+    position = (float(value) - min_v) / span
+    sample_bonus = (samples - 40) / 200 * 18
+    noise_penalty = noise * 0.55
+
+    if algo["slug"] in {"linear-regression", "pca", "random-forest"}:
+        base = 60 + position * 18
+    elif algo["slug"] in {"decision-tree", "knn", "k-means", "gradient-boosting"}:
+        base = 83 - abs(position - 0.45) * 34
+    elif algo["slug"] in {"logistic-regression", "svm", "naive-bayes"}:
+        base = 78 - abs(position - 0.35) * 24
+    else:
+        base = 72
+
+    return max(35, min(96, round(base + sample_bonus - noise_penalty)))
+
+
+def format_value(value: int | float) -> str:
+    if isinstance(value, float) and not value.is_integer():
+        return f"{value:.2f}".rstrip("0").rstrip(".")
+    return str(int(value))
+
+
+def code_from_demo(algo: dict[str, Any], value: int | float, metric: int) -> str:
+    template = algo["demo"]["template"]
+    return template.format(value=format_value(value), metric=metric)
+
+
+def detail_page(slug: str) -> None:
+    algo = selected_algorithm(slug)
+    profile = MODEL_PROFILE[slug]
+    image_path = STATIC_DIR / algo["image"]
+
+    top_left, top_right = st.columns([1.55, 1])
+    with top_left:
+        st.caption(MODEL_FAMILIES[slug])
+        st.title(algo["name"])
+        st.markdown(f"**{algo['tag']}**")
+        st.write(algo["summary"])
+    with top_right:
+        if image_path.exists():
+            st.image(str(image_path), use_container_width=True)
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("難度", profile["difficulty"])
+    c2.metric("資料型態", "表格 / 文字" if slug in {"naive-bayes", "svm"} else "表格 / 數值")
+    c3.metric("學習類型", MODEL_FAMILIES[slug].split(" / ")[0])
+    c4.metric("案例指標", f"{len(algo['case_metrics'])} 個")
+
+    tab_intro, tab_case, tab_demo, tab_check = st.tabs(["原理", "案例", "互動參數", "檢核題"])
+
+    with tab_intro:
+        st.subheader("核心原理")
+        st.write(algo["principle"])
+        guide = algo["principle_guide"]
+        flow_col, chart_col = st.columns([1.2, 1])
+        with flow_col:
+            st.markdown("#### 學習流程")
+            for i, (title, text) in enumerate(guide["steps"], start=1):
+                st.markdown(
+                    f"""
+<div class="flow-step">
+  <div class="step-no">{i}</div>
+  <div><strong>{html.escape(title)}</strong><br><span class="muted">{html.escape(text)}</span></div>
+</div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+        with chart_col:
+            st.markdown("#### 能力輪廓")
+            for label, value in guide["chart"]:
+                st.markdown(
+                    f"""
+<div>
+  <strong>{html.escape(label)}</strong>
+  <div class="bar"><span style="width:{int(value)}%"></span></div>
+</div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            st.markdown(f'<div class="callout">{html.escape(guide["tip"])}</div>', unsafe_allow_html=True)
+
+        st.subheader("適用與注意")
+        a, b, c = st.columns(3)
+        a.markdown(f"**適合資料**\n\n{profile['data']}")
+        b.markdown(f"**主要優勢**\n\n{profile['strength']}")
+        c.markdown(f"**常見風險**\n\n{profile['watch']}")
+
+    with tab_case:
+        st.subheader("應用情境")
+        st.write(algo["case_detail"])
+        st.markdown("#### 案例成效指標")
+        metric_cols = st.columns(3)
+        for col, (label, value) in zip(metric_cols, algo["case_metrics"]):
+            col.metric(label, value)
+        st.markdown("#### 常見用途")
+        st.info(algo["uses"])
+
+    with tab_demo:
+        st.subheader("參數直覺模擬")
+        demo = algo["demo"]
+        control_cols = st.columns(3)
+        variable = demo["variables"][0]
+        with control_cols[0]:
+            param_value = st.slider(
                 variable["label"],
                 min_value=variable["min"],
                 max_value=variable["max"],
                 value=variable["default"],
                 step=variable["step"],
-                format="%g",
-                help=f"{variable['low']} / {variable['high']}",
+                help=f"{variable['low']}；{variable['high']}",
             )
-            st.caption(f"{variable['low']} / {variable['high']}")
+        with control_cols[1]:
+            sample_count = st.slider("訓練資料量", 40, 240, 120, 20)
+        with control_cols[2]:
+            noise_level = st.slider("資料雜訊", 0, 40, 15, 5)
 
-    metrics = calculate_metrics(values, demo)
-    demo_svg = build_demo_svg(selected["slug"], values, demo, metrics, dark_mode=dark_mode)
-    st.markdown(
-        f'<div class="demo-svg-wrap"><img src="{svg_data_uri(demo_svg)}" alt="{selected["name"]} 動態示意圖"></div>',
-        unsafe_allow_html=True,
-    )
-    m1, m2, m3 = st.columns(3)
-    m1.metric("模擬表現", f"{metrics['performance']}%")
-    m2.metric("複雜度", f"{metrics['complexity']}%")
-    m3.metric("穩定度", f"{metrics['stability']}%")
-    st.code(code_sample(selected["slug"], values, metrics, demo), language="python")
+        metric = score_from_demo(algo, param_value, sample_count, noise_level)
+        st.metric("模擬驗證表現", f"{metric} / 100")
+        st.progress(metric / 100)
 
-with check_tab:
-    for index, qa in enumerate(selected["check_questions"], start=1):
-        st.markdown(
-            f'<div class="qa-card"><strong>Q{index}. {qa["question"]}</strong><p>{qa["answer"]}</p></div>',
-            unsafe_allow_html=True,
+        low_col, high_col = st.columns(2)
+        with low_col:
+            st.markdown(f"**低設定傾向**\n\n{variable['low']}")
+        with high_col:
+            st.markdown(f"**高設定傾向**\n\n{variable['high']}")
+
+        st.code(code_from_demo(algo, param_value, metric), language="python")
+        st.caption("這裡的分數是教學用的直覺模擬，用來觀察參數、資料量與雜訊的取捨。")
+
+    with tab_check:
+        st.subheader("檢核題")
+        for index, qa in enumerate(algo["check_questions"], start=1):
+            with st.expander(f"{index}. {qa['question']}"):
+                st.write(qa["answer"])
+        st.markdown(f'<div class="callout">{html.escape(algo["check"])}</div>', unsafe_allow_html=True)
+
+
+def comparison_page() -> None:
+    st.title("演算法比較矩陣")
+    st.write("用任務型態、優勢與風險快速判斷應該先試哪一類模型。")
+
+    rows = []
+    for algo in ALGORITHMS:
+        profile = MODEL_PROFILE[algo["slug"]]
+        rows.append(
+            {
+                "演算法": algo["name"],
+                "英文": algo["tag"],
+                "類型": MODEL_FAMILIES[algo["slug"]],
+                "難度": profile["difficulty"],
+                "適合資料": profile["data"],
+                "主要優勢": profile["strength"],
+                "注意事項": profile["watch"],
+            }
         )
-        st.write("")
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+
+    st.subheader("選型建議")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown(
+            """
+**需要解釋**
+
+線性迴歸、邏輯迴歸、決策樹通常較容易說明模型依據。
+
+**追求穩定表格預測**
+
+隨機森林與梯度提升常是商業資料的實用起點。
+            """
+        )
+    with c2:
+        st.markdown(
+            """
+**沒有標籤**
+
+K-Means 用於分群，PCA 用於降維與視覺化。
+
+**文字或高維稀疏特徵**
+
+樸素貝氏與 SVM 常能建立快速而有效的分類基準。
+            """
+        )
+
+
+def practice_page() -> None:
+    st.title("練習測驗")
+    st.write("從每個演算法抽一題，先想答案，再展開核對。")
+
+    total = 0
+    for algo in ALGORITHMS:
+        qa = algo["check_questions"][0]
+        total += 1
+        with st.expander(f"{algo['name']}：{qa['question']}"):
+            st.write(qa["answer"])
+            st.caption(f"延伸思考：{algo['check']}")
+
+    st.success(f"本頁共 {total} 題。完成後建議回到深入學習頁，調整參數模擬一次。")
+
+
+def report_page() -> None:
+    st.title("研讀報告 PDF")
+    st.write("這個網站依據資料夾內的完整研讀報告整理；可在此下載或開啟預覽。")
+
+    for key, filename in PDF_FILES.items():
+        path = BASE_DIR / filename
+        if not path.exists():
+            continue
+
+        size_mb = path.stat().st_size / 1024 / 1024
+        title = "完整研讀報告" if key == "report" else "對話紀錄"
+        st.subheader(title)
+        st.caption(f"{filename} · {size_mb:.1f} MB")
+        st.download_button(
+            label=f"下載 {title}",
+            data=path.read_bytes(),
+            file_name=filename,
+            mime="application/pdf",
+            use_container_width=True,
+        )
+
+        if st.checkbox(f"在頁面中預覽 {title}", value=(key == "report"), key=f"preview-{key}"):
+            data_uri = cached_pdf_data_uri(str(path))
+            components.html(
+                f"""
+<div class="pdf-frame">
+  <iframe src="{data_uri}" width="100%" height="760" style="border:0;"></iframe>
+</div>
+                """,
+                height=780,
+                scrolling=False,
+            )
+
+
+def sidebar() -> tuple[str, str]:
+    st.sidebar.title("學習網站")
+    for page in PAGES:
+        is_active = st.session_state["active_page"] == page
+        st.sidebar.button(
+            page,
+            key=f"nav-{page}",
+            on_click=set_page,
+            args=(page,),
+            type="primary" if is_active else "secondary",
+            use_container_width=True,
+        )
+
+    st.sidebar.divider()
+    st.sidebar.markdown("**學習順序**")
+    st.sidebar.markdown("1. 總覽點選演算法\n2. 深入學習看原理\n3. 比較矩陣做選型\n4. 練習測驗確認理解")
+    return st.session_state["active_page"], st.session_state["selected_slug"]
+
+
+def main() -> None:
+    init_state()
+    css()
+    page, slug = sidebar()
+
+    if page == "總覽":
+        overview_page()
+    elif page == "深入學習":
+        detail_page(slug)
+    elif page == "比較矩陣":
+        comparison_page()
+    elif page == "練習測驗":
+        practice_page()
+    else:
+        report_page()
+
+
+if __name__ == "__main__":
+    main()
