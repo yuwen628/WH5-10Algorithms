@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from pathlib import Path
 
 import streamlit as st
@@ -110,6 +111,40 @@ STYLE = """
     width: 100%;
     height: 360px;
     display: block;
+  }
+  .demo-svg-wrap img {
+    width: 100%;
+    height: 360px;
+    display: block;
+    object-fit: contain;
+  }
+  [data-testid="stSidebar"] {
+    background: #f7f8f5;
+    border-right: 1px solid #d7dee8;
+  }
+  [data-testid="stSidebar"] [role="radiogroup"] {
+    display: grid;
+    gap: 8px;
+  }
+  [data-testid="stSidebar"] [role="radiogroup"] label {
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(31, 41, 51, .06);
+  }
+  [data-testid="stSidebar"] [role="radiogroup"] label:hover {
+    border-color: rgba(15, 118, 110, .55);
+  }
+  [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
+    border-color: #0f766e;
+    background: #e9f7f4;
+    box-shadow: inset 4px 0 0 #0f766e, 0 12px 28px rgba(15, 118, 110, .12);
+  }
+  [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p {
+    color: #17324d;
+    font-weight: 850;
   }
 </style>
 """
@@ -246,6 +281,11 @@ def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dic
     """
 
 
+def svg_data_uri(svg: str) -> str:
+    encoded = base64.b64encode(svg.encode("utf-8")).decode("ascii")
+    return f"data:image/svg+xml;base64,{encoded}"
+
+
 def code_sample(slug: str, values: dict[str, float], metrics: dict[str, int | str], demo: dict) -> str:
     primary_key = demo["variables"][0]["key"]
     primary_value = values[primary_key]
@@ -300,8 +340,9 @@ st.title("十大機器學習演算法研讀報告")
 st.caption("Streamlit Cloud 版本：互動式演算法摘要、案例、Python 參數模擬與檢核題。")
 
 with st.sidebar:
-    st.header("演算法導覽")
-    selected_name = st.radio("選擇演算法", [item["name"] for item in ALGORITHMS], label_visibility="collapsed")
+    st.header("演算法分頁")
+    st.caption("選擇一個演算法，右側內容會切換成對應頁面。")
+    selected_name = st.radio("演算法", [item["name"] for item in ALGORITHMS], label_visibility="collapsed")
     st.divider()
     st.subheader("原始 PDF")
     for key, filename in PDF_FILES.items():
@@ -368,7 +409,11 @@ with python_tab:
             st.caption(f"{variable['low']} / {variable['high']}")
 
     metrics = calculate_metrics(values, demo)
-    st.html(f'<div class="demo-svg-wrap">{build_demo_svg(selected["slug"], values, demo, metrics)}</div>')
+    demo_svg = build_demo_svg(selected["slug"], values, demo, metrics)
+    st.markdown(
+        f'<div class="demo-svg-wrap"><img src="{svg_data_uri(demo_svg)}" alt="{selected["name"]} 動態示意圖"></div>',
+        unsafe_allow_html=True,
+    )
     m1, m2, m3 = st.columns(3)
     m1.metric("模擬表現", f"{metrics['performance']}%")
     m2.metric("複雜度", f"{metrics['complexity']}%")
