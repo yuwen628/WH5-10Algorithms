@@ -236,6 +236,45 @@ def theme_css(dark_mode: bool) -> str:
       :root {{
 {variables}
       }}
+      html,
+      body,
+      .stApp,
+      [data-testid="stAppViewContainer"],
+      [data-testid="stMain"],
+      [data-testid="stMainBlockContainer"],
+      section.main {{
+        background: {values["app-bg"]} !important;
+        color: {values["ink"]} !important;
+      }}
+      [data-testid="stHeader"] {{
+        background: {values["app-bg"]} !important;
+        color: {values["ink"]} !important;
+      }}
+      [data-testid="stSidebar"],
+      [data-testid="stSidebarContent"] {{
+        background: {values["sidebar-bg"]} !important;
+        color: {values["ink"]} !important;
+      }}
+      [data-testid="stMarkdownContainer"],
+      [data-testid="stMarkdownContainer"] p,
+      [data-testid="stMarkdownContainer"] li,
+      [data-testid="stMarkdownContainer"] h1,
+      [data-testid="stMarkdownContainer"] h2,
+      [data-testid="stMarkdownContainer"] h3,
+      [data-testid="stMarkdownContainer"] h4,
+      [data-testid="stMarkdownContainer"] h5,
+      [data-testid="stMarkdownContainer"] h6,
+      [data-testid="stWidgetLabel"],
+      [data-testid="stCaptionContainer"] {{
+        color: {values["ink"]} !important;
+      }}
+      .stAlert,
+      [data-testid="stNotificationContentInfo"],
+      [data-testid="stExpander"] {{
+        background: {values["panel"]} !important;
+        color: {values["ink"]} !important;
+        border-color: {values["line"]} !important;
+      }}
     </style>
     """
 
