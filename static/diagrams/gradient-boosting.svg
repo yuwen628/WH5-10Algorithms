@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Gradient boosting sequence diagram</title>
+  <rect width="640" height="360" rx="24" fill="#f7fee7"/>
+  <g fill="#ffffff" stroke="#d7dee8" stroke-width="3">
+    <rect x="62" y="120" width="110" height="92" rx="14"/>
+    <rect x="210" y="120" width="110" height="92" rx="14"/>
+    <rect x="358" y="120" width="110" height="92" rx="14"/>
+    <rect x="506" y="120" width="70" height="92" rx="14"/>
+  </g>
+  <g stroke="#0f766e" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M117 148V176M117 176L92 196M117 176L144 196"/>
+    <path d="M265 148V176M265 176L240 196M265 176L292 196"/>
+    <path d="M413 148V176M413 176L388 196M413 176L440 196"/>
+    <path d="M541 148V176M541 176L522 196M541 176L560 196"/>
+  </g>
+  <g fill="#b45309" font-family="Segoe UI, sans-serif" font-size="32" font-weight="800" text-anchor="middle">
+    <text x="191" y="178">+</text>
+    <text x="339" y="178">+</text>
+    <text x="487" y="178">+</text>
+  </g>
+  <path d="M84 276C186 246 272 250 356 232C438 214 488 186 558 78" fill="none" stroke="#17324d" stroke-width="8" stroke-linecap="round"/>
+  <text x="320" y="70" fill="#17324d" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="24" font-weight="800">learn residuals step by step</text>
+</svg>

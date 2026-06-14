@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Decision tree diagram</title>
+  <rect width="640" height="360" rx="24" fill="#eff6ff"/>
+  <g stroke="#17324d" stroke-width="6" stroke-linecap="round">
+    <path d="M320 88V138M320 138L190 198M320 138L450 198M190 232L122 292M190 232L256 292M450 232L386 292M450 232L518 292"/>
+  </g>
+  <g font-family="Segoe UI, sans-serif" font-weight="800" text-anchor="middle">
+    <rect x="246" y="42" width="148" height="58" rx="12" fill="#0f766e"/><text x="320" y="78" fill="#fff" font-size="20">feature?</text>
+    <rect x="126" y="178" width="128" height="58" rx="12" fill="#f5c36b"/><text x="190" y="214" fill="#17324d" font-size="18">yes</text>
+    <rect x="386" y="178" width="128" height="58" rx="12" fill="#f5c36b"/><text x="450" y="214" fill="#17324d" font-size="18">no</text>
+    <rect x="70" y="284" width="104" height="48" rx="12" fill="#ffffff"/><text x="122" y="315" fill="#17324d" font-size="16">A</text>
+    <rect x="204" y="284" width="104" height="48" rx="12" fill="#ffffff"/><text x="256" y="315" fill="#17324d" font-size="16">B</text>
+    <rect x="334" y="284" width="104" height="48" rx="12" fill="#ffffff"/><text x="386" y="315" fill="#17324d" font-size="16">C</text>
+    <rect x="466" y="284" width="104" height="48" rx="12" fill="#ffffff"/><text x="518" y="315" fill="#17324d" font-size="16">D</text>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Logistic regression probability curve">
+  <rect width="640" height="360" rx="24" fill="#f4f1ff"/>
+  <g stroke="#24324a" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M76 292H570"/>
+    <path d="M94 308V54"/>
+  </g>
+  <path d="M104 270C170 270 220 258 260 218C306 172 318 106 382 82C428 64 486 62 548 62" fill="none" stroke="#6d5bd0" stroke-width="11" stroke-linecap="round"/>
+  <path d="M96 146H560" stroke="#b45309" stroke-width="4" stroke-linecap="round" stroke-dasharray="12 12"/>
+  <g fill="#0f766e">
+    <circle cx="140" cy="266" r="12"/>
+    <circle cx="204" cy="252" r="12"/>
+    <circle cx="264" cy="216" r="12"/>
+    <circle cx="302" cy="176" r="12"/>
+  </g>
+  <g fill="#dc2626">
+    <circle cx="380" cy="96" r="12"/>
+    <circle cx="448" cy="72" r="12"/>
+    <circle cx="520" cy="64" r="12"/>
+  </g>
+  <rect x="104" y="34" width="244" height="42" rx="21" fill="#ffffff" opacity=".9"/>
+  <text x="126" y="62" fill="#24324a" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">probability curve</text>
+</svg>

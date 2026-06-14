@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Random forest diagram</title>
+  <rect width="640" height="360" rx="24" fill="#f0fdf4"/>
+  <g stroke="#17324d" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M132 76V126M132 126L76 178M132 126L188 178"/>
+    <path d="M302 60V118M302 118L240 182M302 118L364 182"/>
+    <path d="M470 82V134M470 134L416 184M470 134L530 184"/>
+    <path d="M132 216C176 260 230 284 320 292C408 284 466 260 510 216"/>
+  </g>
+  <g fill="#0f766e">
+    <circle cx="132" cy="70" r="18"/><circle cx="302" cy="54" r="18"/><circle cx="470" cy="76" r="18"/>
+  </g>
+  <g fill="#b45309">
+    <circle cx="76" cy="184" r="14"/><circle cx="188" cy="184" r="14"/><circle cx="240" cy="188" r="14"/><circle cx="364" cy="188" r="14"/><circle cx="416" cy="190" r="14"/><circle cx="530" cy="190" r="14"/>
+  </g>
+  <rect x="244" y="274" width="152" height="48" rx="24" fill="#17324d"/>
+  <text x="320" y="305" fill="#fff" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="20" font-weight="800">vote</text>
+</svg>

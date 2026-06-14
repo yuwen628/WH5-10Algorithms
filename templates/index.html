@@ -1,0 +1,178 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>十大機器學習演算法研讀報告</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="hero">
+    <img src="{{ url_for('static', filename='hero-ai.png') }}" alt="AI 生成的十大機器學習演算法主視覺">
+    <div class="hero__overlay"></div>
+    <nav class="topbar" aria-label="主要導覽">
+      <a href="#algorithms">演算法</a>
+      <a href="#resources">報告 PDF</a>
+      <a href="#deploy">部署</a>
+    </nav>
+    <section class="hero__content">
+      <p>Machine Learning Study Notes</p>
+      <h1>十大機器學習演算法研讀報告</h1>
+      <span>把完整報告、對話紀錄與重點摘要整理成可上雲端的互動網頁。</span>
+    </section>
+  </header>
+
+  <main>
+    <section id="algorithms" class="section section--intro">
+      <div>
+        <p class="eyebrow">Overview</p>
+        <h2>快速掌握十種核心演算法</h2>
+      </div>
+      <p>這份網頁依照資料夾中的報告主題整理出學習地圖：每張卡片包含核心用途、直覺說明與英文名稱，適合作為課堂展示、複習入口或雲端作業頁面。</p>
+    </section>
+
+    <section class="algorithm-grid" aria-label="十大演算法列表">
+      {% for item in algorithms %}
+      <article class="algorithm-card" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="modal-{{ item.slug }}">
+        <img class="algorithm-card__image" src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}示意圖">
+        <div class="algorithm-card__head">
+          <span>{{ "%02d"|format(loop.index) }}</span>
+          <small>{{ item.tag }}</small>
+        </div>
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.summary }}</p>
+        <div class="uses">{{ item.uses }}</div>
+        <button class="card-action" type="button" data-open-modal="modal-{{ item.slug }}">查看詳情</button>
+      </article>
+      {% endfor %}
+    </section>
+
+    {% for item in algorithms %}
+    <dialog class="algorithm-modal" id="modal-{{ item.slug }}" aria-labelledby="modal-title-{{ item.slug }}">
+      <div class="modal-shell">
+        <button class="modal-close" type="button" data-close-modal aria-label="關閉視窗">×</button>
+        <div class="modal-visual">
+          <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}示意圖">
+        </div>
+        <div class="modal-content">
+          <p class="eyebrow">{{ item.tag }}</p>
+          <h2 id="modal-title-{{ item.slug }}">{{ item.name }}</h2>
+          <div class="modal-tabs" role="tablist" aria-label="{{ item.name }}詳細內容">
+            <button class="modal-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-principle-{{ item.slug }}" id="tab-principle-{{ item.slug }}" data-tab-target="panel-principle-{{ item.slug }}">原理</button>
+            <button class="modal-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-case-{{ item.slug }}" id="tab-case-{{ item.slug }}" data-tab-target="panel-case-{{ item.slug }}">實務案例</button>
+            <button class="modal-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-python-{{ item.slug }}" id="tab-python-{{ item.slug }}" data-tab-target="panel-python-{{ item.slug }}">Python 實作</button>
+            <button class="modal-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-check-{{ item.slug }}" id="tab-check-{{ item.slug }}" data-tab-target="panel-check-{{ item.slug }}">檢核題</button>
+          </div>
+          <div class="modal-section tab-panel is-active" id="panel-principle-{{ item.slug }}" role="tabpanel" aria-labelledby="tab-principle-{{ item.slug }}">
+            <p>{{ item.principle }}</p>
+            <div class="principle-flow" aria-label="{{ item.name }}原理流程">
+              {% for title, description in item.principle_guide.steps %}
+              <article>
+                <span>{{ "%02d"|format(loop.index) }}</span>
+                <strong>{{ title }}</strong>
+                <p>{{ description }}</p>
+              </article>
+              {% endfor %}
+            </div>
+            <div class="principle-chart" aria-label="{{ item.name }}理解指標">
+              {% for label, value in item.principle_guide.chart %}
+              <div class="principle-chart__row">
+                <span>{{ label }}</span>
+                <div><i style="width: {{ value }}%"></i></div>
+                <strong>{{ value }}</strong>
+              </div>
+              {% endfor %}
+            </div>
+            <p class="principle-tip">{{ item.principle_guide.tip }}</p>
+          </div>
+          <div class="modal-section tab-panel" id="panel-case-{{ item.slug }}" role="tabpanel" aria-labelledby="tab-case-{{ item.slug }}" hidden>
+            <p>{{ item.case }}</p>
+            <p class="case-detail">{{ item.case_detail }}</p>
+            <div class="case-chart" aria-label="{{ item.name }}實務案例指標">
+              {% for label, value in item.case_metrics %}
+              <div class="case-chart__row">
+                <span>{{ label }}</span>
+                <div class="case-chart__track">
+                  <i style="width: {{ value }}%"></i>
+                </div>
+                <strong>{{ value }}</strong>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="modal-section tab-panel" id="panel-python-{{ item.slug }}" role="tabpanel" aria-labelledby="tab-python-{{ item.slug }}" hidden>
+            <div class="python-lab" data-demo="{{ item.demo|tojson|forceescape }}">
+              <div class="python-lab__output">
+                <div class="demo-canvas" data-demo-visual role="img" aria-label="{{ item.name }}參數示意圖">
+                  <svg viewBox="0 0 520 260" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+                <p data-demo-result></p>
+              </div>
+              <div class="python-lab__controls">
+                {% for variable in item.demo.variables %}
+                <label>
+                  <span>{{ variable.label }}</span>
+                  <strong data-param-value="{{ variable.key }}">{{ variable.default }}{{ variable.unit }}</strong>
+                  <input
+                    type="range"
+                    min="{{ variable.min }}"
+                    max="{{ variable.max }}"
+                    step="{{ variable.step }}"
+                    value="{{ variable.default }}"
+                    data-param-input
+                    data-key="{{ variable.key }}"
+                  >
+                  <small>{{ variable.low }} / {{ variable.high }}</small>
+                </label>
+                {% endfor %}
+              </div>
+              <pre><code data-code-output>{{ item.python }}</code></pre>
+            </div>
+          </div>
+          <div class="modal-section tab-panel check" id="panel-check-{{ item.slug }}" role="tabpanel" aria-labelledby="tab-check-{{ item.slug }}" hidden>
+            <div class="check-list">
+              {% for qa in item.check_questions %}
+              <article>
+                <span>Q{{ loop.index }}</span>
+                <h3>{{ qa.question }}</h3>
+                <p>{{ qa.answer }}</p>
+              </article>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </dialog>
+    {% endfor %}
+
+    <section id="resources" class="section resources">
+      <div>
+        <p class="eyebrow">Source Files</p>
+        <h2>原始報告與對話紀錄</h2>
+        <p>部署後可直接在線閱讀 PDF，也能下載保存；檔案保留在專案根目錄，由 Flask 路由安全提供。</p>
+      </div>
+      <div class="resource-list">
+        {% for pdf in pdfs %}
+        <a class="resource-item" href="{{ url_for('pdf', key=pdf.key) }}" target="_blank" rel="noreferrer">
+          <span>{{ pdf.filename }}</span>
+          <strong>{{ pdf.size_mb }} MB</strong>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="deploy" class="section deploy">
+      <div>
+        <p class="eyebrow">Cloud Ready</p>
+        <h2>部署指令</h2>
+      </div>
+      <div class="commands" aria-label="部署指令">
+        <code>pip install -r requirements.txt</code>
+        <code>python app.py</code>
+        <code>gunicorn app:app</code>
+      </div>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Naive Bayes probability diagram</title>
+  <rect width="640" height="360" rx="24" fill="#fef2f2"/>
+  <g fill="#ffffff" stroke="#d7dee8" stroke-width="3">
+    <rect x="58" y="76" width="154" height="86" rx="14"/>
+    <rect x="244" y="76" width="154" height="86" rx="14"/>
+    <rect x="430" y="76" width="154" height="86" rx="14"/>
+    <rect x="196" y="228" width="248" height="72" rx="16"/>
+  </g>
+  <g stroke="#17324d" stroke-width="5" stroke-linecap="round">
+    <path d="M135 162L248 228M321 162L321 228M507 162L394 228"/>
+  </g>
+  <g font-family="Segoe UI, sans-serif" font-weight="800" text-anchor="middle">
+    <text x="135" y="127" fill="#0f766e" font-size="20">P(feature)</text>
+    <text x="321" y="127" fill="#b45309" font-size="20">P(class)</text>
+    <text x="507" y="127" fill="#6d5bd0" font-size="20">P(word)</text>
+    <text x="320" y="272" fill="#17324d" font-size="24">posterior</text>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Linear regression diagram</title>
+  <rect width="640" height="360" rx="24" fill="#edf7f5"/>
+  <path d="M70 292H574M88 312V54" stroke="#17324d" stroke-width="6" stroke-linecap="round"/>
+  <path d="M108 256C185 218 260 184 342 141C424 98 486 72 548 48" fill="none" stroke="#0f766e" stroke-width="10" stroke-linecap="round"/>
+  <g fill="#b45309">
+    <circle cx="132" cy="238" r="12"/><circle cx="186" cy="204" r="12"/><circle cx="244" cy="214" r="12"/>
+    <circle cx="306" cy="158" r="12"/><circle cx="366" cy="148" r="12"/><circle cx="438" cy="92" r="12"/>
+    <circle cx="506" cy="86" r="12"/>
+  </g>
+  <text x="94" y="46" fill="#17324d" font-family="Segoe UI, sans-serif" font-size="26" font-weight="700">best-fit line</text>
+</svg>

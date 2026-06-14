@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">K-Means clustering diagram</title>
+  <rect width="640" height="360" rx="24" fill="#f8fafc"/>
+  <g fill="#0f766e">
+    <circle cx="144" cy="128" r="11"/><circle cx="188" cy="154" r="11"/><circle cx="166" cy="198" r="11"/><circle cx="220" cy="112" r="11"/>
+  </g>
+  <g fill="#b45309">
+    <circle cx="420" cy="118" r="11"/><circle cx="462" cy="154" r="11"/><circle cx="510" cy="126" r="11"/><circle cx="462" cy="84" r="11"/>
+  </g>
+  <g fill="#6d5bd0">
+    <circle cx="334" cy="244" r="11"/><circle cx="386" cy="268" r="11"/><circle cx="280" cy="282" r="11"/><circle cx="326" cy="304" r="11"/>
+  </g>
+  <g stroke="#17324d" stroke-width="6">
+    <path d="M180 148l-16 28M180 148l30-28M180 148l-36-20"/>
+    <path d="M464 120l-42-2M464 120l44 6M464 120l-2-36"/>
+    <path d="M334 274l-54 8M334 274l52-6M334 274l-8 30"/>
+  </g>
+  <g fill="#17324d">
+    <path d="M180 132l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z"/>
+    <path d="M464 104l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z"/>
+    <path d="M334 258l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z"/>
+  </g>
+</svg>

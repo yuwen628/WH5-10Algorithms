@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">KNN neighbor diagram</title>
+  <rect width="640" height="360" rx="24" fill="#ecfeff"/>
+  <circle cx="322" cy="178" r="104" fill="none" stroke="#0f766e" stroke-width="7" stroke-dasharray="14 12"/>
+  <circle cx="322" cy="178" r="17" fill="#17324d"/>
+  <g fill="#0f766e">
+    <circle cx="246" cy="126" r="13"/><circle cx="286" cy="236" r="13"/><circle cx="376" cy="112" r="13"/><circle cx="422" cy="210" r="13"/>
+  </g>
+  <g fill="#b45309">
+    <circle cx="132" cy="256" r="13"/><circle cx="174" cy="84" r="13"/><circle cx="486" cy="282" r="13"/><circle cx="524" cy="100" r="13"/>
+  </g>
+  <text x="322" y="330" fill="#17324d" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="24" font-weight="800">nearest neighbors vote</text>
+</svg>
