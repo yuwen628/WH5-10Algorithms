@@ -17,6 +17,24 @@ st.set_page_config(
 
 STYLE = """
 <style>
+  :root {
+    --app-bg: #f7f8f5;
+    --panel: #ffffff;
+    --panel-soft: #f8fbfb;
+    --sidebar-bg: #f7f8f5;
+    --ink: #1f2933;
+    --muted: #5f6b7a;
+    --line: #d7dee8;
+    --accent: #0f766e;
+    --accent-2: #b45309;
+    --accent-soft: #e9f7f4;
+    --tip-bg: #fff7ed;
+    --shadow: rgba(31, 41, 51, .08);
+  }
+  .stApp {
+    background: var(--app-bg);
+    color: var(--ink);
+  }
   .main .block-container {
     max-width: 1220px;
     padding-top: 1.5rem;
@@ -68,14 +86,15 @@ STYLE = """
     font-size: 1.08rem;
   }
   .metric-card, .step-card, .qa-card, .info-card {
-    border: 1px solid #d7dee8;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    background: #fff;
+    background: var(--panel);
     padding: 16px;
     height: 100%;
+    box-shadow: 0 14px 30px var(--shadow);
   }
   .step-card strong, .qa-card strong {
-    color: #17324d;
+    color: var(--ink);
   }
   .step-number {
     display: inline-grid;
@@ -83,16 +102,16 @@ STYLE = """
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #0f766e;
+    background: var(--accent);
     color: #fff;
     font-weight: 850;
     margin-bottom: 10px;
   }
   .tip {
-    border-left: 5px solid #b45309;
+    border-left: 5px solid var(--accent-2);
     border-radius: 8px;
-    background: #fff7ed;
-    color: #17324d;
+    background: var(--tip-bg);
+    color: var(--ink);
     padding: 16px;
     font-weight: 700;
   }
@@ -102,10 +121,11 @@ STYLE = """
   .demo-svg-wrap {
     width: 100%;
     min-height: 390px;
-    border: 1px solid #d7dee8;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    background: #f8fbfb;
+    background: var(--panel-soft);
     padding: 12px;
+    box-shadow: 0 16px 34px var(--shadow);
   }
   .demo-svg-wrap svg {
     width: 100%;
@@ -119,8 +139,8 @@ STYLE = """
     object-fit: contain;
   }
   [data-testid="stSidebar"] {
-    background: #f7f8f5;
-    border-right: 1px solid #d7dee8;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--line);
   }
   [data-testid="stSidebar"] [role="radiogroup"] {
     display: grid;
@@ -129,25 +149,100 @@ STYLE = """
   [data-testid="stSidebar"] [role="radiogroup"] label {
     min-height: 46px;
     padding: 10px 12px;
-    border: 1px solid #d7dee8;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 10px 24px rgba(31, 41, 51, .06);
+    background: var(--panel);
+    box-shadow: 0 10px 24px var(--shadow);
   }
   [data-testid="stSidebar"] [role="radiogroup"] label:hover {
     border-color: rgba(15, 118, 110, .55);
   }
   [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
-    border-color: #0f766e;
-    background: #e9f7f4;
-    box-shadow: inset 4px 0 0 #0f766e, 0 12px 28px rgba(15, 118, 110, .12);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: inset 4px 0 0 var(--accent), 0 12px 28px rgba(15, 118, 110, .12);
   }
   [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p {
-    color: #17324d;
+    color: var(--ink);
     font-weight: 850;
+  }
+  [data-testid="stSidebar"] h1,
+  [data-testid="stSidebar"] h2,
+  [data-testid="stSidebar"] h3,
+  [data-testid="stSidebar"] p,
+  [data-testid="stMarkdownContainer"] {
+    color: var(--ink);
+  }
+  [data-testid="stMetric"] {
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: 0 12px 28px var(--shadow);
+  }
+  .stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+  }
+  .stTabs [data-baseweb="tab"] {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .stTabs [aria-selected="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
   }
 </style>
 """
+
+
+def theme_css(dark_mode: bool) -> str:
+    if dark_mode:
+        values = {
+            "app-bg": "#101820",
+            "panel": "#17212b",
+            "panel-soft": "#1f2b36",
+            "sidebar-bg": "#121c24",
+            "ink": "#edf4f7",
+            "muted": "#b9c6d0",
+            "line": "#304252",
+            "accent": "#36c4b4",
+            "accent-2": "#f5c36b",
+            "accent-soft": "#173f3c",
+            "tip-bg": "#2a2418",
+            "shadow": "rgba(0, 0, 0, .28)",
+        }
+    else:
+        values = {
+            "app-bg": "#f7f8f5",
+            "panel": "#ffffff",
+            "panel-soft": "#f8fbfb",
+            "sidebar-bg": "#f7f8f5",
+            "ink": "#1f2933",
+            "muted": "#5f6b7a",
+            "line": "#d7dee8",
+            "accent": "#0f766e",
+            "accent-2": "#b45309",
+            "accent-soft": "#e9f7f4",
+            "tip-bg": "#fff7ed",
+            "shadow": "rgba(31, 41, 51, .08)",
+        }
+
+    variables = "\n".join(f"    --{key}: {value};" for key, value in values.items())
+    return f"""
+    <style>
+      :root {{
+{variables}
+      }}
+    </style>
+    """
+
+
+def file_data_uri(path: Path, mime: str) -> str:
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{encoded}"
 
 
 def file_size_mb(path: Path) -> float:
@@ -205,8 +300,10 @@ def svg_line(x1: float, y1: float, x2: float, y2: float, color: str, width: int 
     return f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{color}" stroke-width="{width}" stroke-linecap="round" {extra}/>'
 
 
-def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dict[str, int | str]) -> str:
-    colors = ["#0f766e", "#b45309", "#6d5bd0", "#dc2626"]
+def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dict[str, int | str], dark_mode: bool = False) -> str:
+    colors = ["#36c4b4", "#f5c36b", "#8f7df2", "#f87171"] if dark_mode else ["#0f766e", "#b45309", "#6d5bd0", "#dc2626"]
+    canvas_bg = "#1f2b36" if dark_mode else "#f8fbfb"
+    axis = "#edf4f7" if dark_mode else "#17324d"
     primary_key = demo["variables"][0]["key"]
     primary = values[primary_key]
     noise = values["noise_level"]
@@ -218,36 +315,36 @@ def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dic
         slope = 0.36 + primary * 0.055
         y1 = 212 - noise * 0.5
         y2 = y1 - 320 * slope
-        body = f'{svg_line(42, 226, 486, 226, "#17324d", 3)}{svg_line(54, 226, 54, 34, "#17324d", 3)}{points}{svg_line(74, y1, 454, y2, "#0f766e", 7)}'
+        body = f'{svg_line(42, 226, 486, 226, axis, 3)}{svg_line(54, 226, 54, 34, axis, 3)}{points}{svg_line(74, y1, 454, y2, colors[0], 7)}'
     elif slug == "logistic-regression":
         curve = 80 + primary * 7
-        body = f'{svg_line(42, 226, 486, 226, "#17324d", 3)}{svg_line(54, 226, 54, 34, "#17324d", 3)}{points}<path d="M70 210 C 160 210, 190 {curve + 70:.1f}, 262 {curve:.1f} S 370 54, 458 54" fill="none" stroke="#0f766e" stroke-width="7" stroke-linecap="round"/><line x1="58" y1="132" x2="470" y2="132" stroke="#b45309" stroke-width="3" stroke-dasharray="8 9"/>'
+        body = f'{svg_line(42, 226, 486, 226, axis, 3)}{svg_line(54, 226, 54, 34, axis, 3)}{points}<path d="M70 210 C 160 210, 190 {curve + 70:.1f}, 262 {curve:.1f} S 370 54, 458 54" fill="none" stroke="{colors[0]}" stroke-width="7" stroke-linecap="round"/><line x1="58" y1="132" x2="470" y2="132" stroke="{colors[1]}" stroke-width="3" stroke-dasharray="8 9"/>'
     elif slug == "decision-tree":
         levels = min(5, int(primary))
-        body = '<circle cx="260" cy="42" r="24" fill="#0f766e"/>'
+        body = f'<circle cx="260" cy="42" r="24" fill="{colors[0]}"/>'
         for level in range(1, levels + 1):
             nodes = min(2 ** level, 12)
             for node in range(nodes):
                 x = 60 + node * (400 / max(1, nodes - 1))
                 y = 42 + level * 36
-                body += svg_line(260, 42 + (level - 1) * 24, x, y, "#17324d", 2)
+                body += svg_line(260, 42 + (level - 1) * 24, x, y, axis, 2)
                 body += svg_circle(x, y, 10, colors[node % len(colors)])
     elif slug == "random-forest":
         body = ""
         for index in range(max(1, round(primary / 30))):
             x = 54 + index * 38
-            body += svg_line(x, 126, x, 74, "#17324d", 3)
-            body += svg_line(x, 100, x - 18, 132, "#17324d", 3)
-            body += svg_line(x, 100, x + 18, 132, "#17324d", 3)
+            body += svg_line(x, 126, x, 74, axis, 3)
+            body += svg_line(x, 100, x - 18, 132, axis, 3)
+            body += svg_line(x, 100, x + 18, 132, axis, 3)
             body += svg_circle(x, 68, 10, colors[index % len(colors)])
-        body += f'<rect x="190" y="186" width="140" height="42" rx="21" fill="#17324d"/><text x="260" y="213" fill="#fff" text-anchor="middle" font-size="18" font-weight="800">vote {metrics["stability"]}%</text>'
+        body += f'<rect x="190" y="186" width="140" height="42" rx="21" fill="{axis}"/><text x="260" y="213" fill="{canvas_bg}" text-anchor="middle" font-size="18" font-weight="800">vote {metrics["stability"]}%</text>'
     elif slug == "svm":
         margin = max(28, min(116, 88 - primary * 4.5 + noise * 0.6))
         dashed = 'stroke-dasharray="8 8"'
-        body = f'{points}{svg_line(130, 226, 390, 42, "#17324d", 7)}{svg_line(130 - margin, 226, 390 - margin, 42, "#f5c36b", 3, dashed)}{svg_line(130 + margin, 226, 390 + margin, 42, "#f5c36b", 3, dashed)}'
+        body = f'{points}{svg_line(130, 226, 390, 42, axis, 7)}{svg_line(130 - margin, 226, 390 - margin, 42, colors[1], 3, dashed)}{svg_line(130 + margin, 226, 390 + margin, 42, colors[1], 3, dashed)}'
     elif slug == "knn":
         radius = 40 + primary * 6
-        body = f'{points}{svg_circle(260, 130, 10, "#17324d")}<circle cx="260" cy="130" r="{radius:.1f}" fill="none" stroke="#0f766e" stroke-width="5" stroke-dasharray="10 8"/><text x="260" y="236" fill="#17324d" text-anchor="middle" font-size="18" font-weight="800">K={primary:g}</text>'
+        body = f'{points}{svg_circle(260, 130, 10, axis)}<circle cx="260" cy="130" r="{radius:.1f}" fill="none" stroke="{colors[0]}" stroke-width="5" stroke-dasharray="10 8"/><text x="260" y="236" fill="{axis}" text-anchor="middle" font-size="18" font-weight="800">K={primary:g}</text>'
     elif slug == "k-means":
         centers = [(150, 90), (370, 175), (250, 180), (410, 80), (116, 180), (320, 84), (220, 70), (430, 215)]
         body = points
@@ -256,12 +353,12 @@ def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dic
     elif slug == "pca":
         angle = 24 + primary * 4
         dashed = 'stroke-dasharray="8 8"'
-        body = f'{points}<g transform="rotate(-{angle:.1f} 260 130)">{svg_line(70, 130, 454, 130, "#0f766e", 7)}{svg_line(170, 82, 350, 178, "#b45309", 4, dashed)}</g><text x="62" y="42" fill="#17324d" font-size="18" font-weight="800">components={primary:g}</text>'
+        body = f'{points}<g transform="rotate(-{angle:.1f} 260 130)">{svg_line(70, 130, 454, 130, colors[0], 7)}{svg_line(170, 82, 350, 178, colors[1], 4, dashed)}</g><text x="62" y="42" fill="{axis}" font-size="18" font-weight="800">components={primary:g}</text>'
     elif slug == "naive-bayes":
         body = ""
         for index, height in enumerate([metrics["performance"], metrics["stability"], 100 - noise * 1.5]):
             body += f'<rect x="{104 + index * 100}" y="{220 - float(height) * 1.5:.1f}" width="54" height="{float(height) * 1.5:.1f}" rx="8" fill="{colors[index]}"/>'
-        body += f'<text x="260" y="42" fill="#17324d" text-anchor="middle" font-size="18" font-weight="800">alpha={primary:g}</text><path d="M96 226H430" stroke="#17324d" stroke-width="4" stroke-linecap="round"/>'
+        body += f'<text x="260" y="42" fill="{axis}" text-anchor="middle" font-size="18" font-weight="800">alpha={primary:g}</text><path d="M96 226H430" stroke="{axis}" stroke-width="4" stroke-linecap="round"/>'
     else:
         steps = round(4 + primary * 20)
         body = ""
@@ -271,11 +368,11 @@ def build_demo_svg(slug: str, values: dict[str, float], demo: dict, metrics: dic
             body += f'<rect x="{x}" y="{190 - height:.1f}" width="34" height="{height:.1f}" rx="8" fill="{colors[index % len(colors)]}"/>'
             if index < 7:
                 body += f'<text x="{x + 42}" y="150" fill="#b45309" font-size="24" font-weight="800">+</text>'
-        body += '<path d="M58 222C150 206 220 182 292 146C352 116 404 88 458 44" fill="none" stroke="#17324d" stroke-width="6" stroke-linecap="round"/>'
+        body += f'<path d="M58 222C150 206 220 182 292 146C352 116 404 88 458 44" fill="none" stroke="{axis}" stroke-width="6" stroke-linecap="round"/>'
 
     return f"""
     <svg viewBox="0 0 520 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-      <rect width="520" height="260" rx="18" fill="#f8fbfb"/>
+      <rect width="520" height="260" rx="18" fill="{canvas_bg}"/>
       {body}
     </svg>
     """
@@ -332,12 +429,25 @@ model.fit(X, y)
 print("validation_score", {metrics['metric']})"""
 
 
-st.markdown(STYLE, unsafe_allow_html=True)
+with st.sidebar:
+    dark_mode = st.toggle("深色背景", value=False)
+
+st.markdown(STYLE + theme_css(dark_mode), unsafe_allow_html=True)
 
 hero_path = BASE_DIR / "static" / "hero-ai.png"
-st.image(hero_path, use_container_width=True)
-st.title("十大機器學習演算法研讀報告")
-st.caption("Streamlit Cloud 版本：互動式演算法摘要、案例、Python 參數模擬與檢核題。")
+st.markdown(
+    f"""
+    <section class="hero">
+      <img src="{file_data_uri(hero_path, "image/png")}" alt="十大機器學習演算法主視覺">
+      <div class="hero-content">
+        <p>Machine Learning Study Notes</p>
+        <h1>十大機器學習演算法研讀報告</h1>
+        <span>互動式演算法摘要、實務案例、Python 參數模擬與學習檢核題。</span>
+      </div>
+    </section>
+    """,
+    unsafe_allow_html=True,
+)
 
 with st.sidebar:
     st.header("演算法分頁")
@@ -409,7 +519,7 @@ with python_tab:
             st.caption(f"{variable['low']} / {variable['high']}")
 
     metrics = calculate_metrics(values, demo)
-    demo_svg = build_demo_svg(selected["slug"], values, demo, metrics)
+    demo_svg = build_demo_svg(selected["slug"], values, demo, metrics, dark_mode=dark_mode)
     st.markdown(
         f'<div class="demo-svg-wrap"><img src="{svg_data_uri(demo_svg)}" alt="{selected["name"]} 動態示意圖"></div>',
         unsafe_allow_html=True,
