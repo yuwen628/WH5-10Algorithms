@@ -295,7 +295,7 @@ print("validation_score", {metrics['metric']})"""
 st.markdown(STYLE, unsafe_allow_html=True)
 
 hero_path = BASE_DIR / "static" / "hero-ai.png"
-st.image(hero_path, width="stretch")
+st.image(hero_path, use_container_width=True)
 st.title("十大機器學習演算法研讀報告")
 st.caption("Streamlit Cloud 版本：互動式演算法摘要、案例、Python 參數模擬與檢核題。")
 
@@ -319,7 +319,7 @@ selected = next(item for item in ALGORITHMS if item["name"] == selected_name)
 
 top_cols = st.columns([1, 1.2], vertical_alignment="center")
 with top_cols[0]:
-    st.image(BASE_DIR / "static" / selected["image"], width="stretch")
+    st.image(BASE_DIR / "static" / selected["image"], use_container_width=True)
 with top_cols[1]:
     st.subheader(selected["name"])
     st.caption(selected["tag"])
